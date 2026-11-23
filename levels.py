@@ -1,6 +1,7 @@
 # levels.py
 import pygame
 from settings import TILE_SIZE, PALETTES
+from enemies import Guard
 
 # Legenda:
 # '#' - Zid u obe dimenzije
@@ -9,6 +10,8 @@ from settings import TILE_SIZE, PALETTES
 # 'P' - Početna pozicija igrača
 # '1' - Ključ (Data Core) u LIGHT dimenziji
 # '2' - Ključ (Data Core) u DARK dimenziji
+# 'G' - Čuvar u LIGHT dimenziji (patrolira horizontalno)
+# 'S' - Čuvar u DARK dimenziji (patrolira horizontalno)
 # 'E' - Izlaz (Exit)
 
 LEVELS = [
@@ -19,9 +22,9 @@ LEVELS = [
         "#    L   ##   D    #",
         "#        ##        #",
         "#   DDDDDDDDDDDD   #",
-        "#        ##        #",
+        "#      G           #",
         "#   LLLLLLLLLLLL   #",
-        "#        ##        #",
+        "#           S      #",
         "#    D   ##   L    #",
         "#    D   ##   L    #",
         "#    D        L   E#",
@@ -35,11 +38,11 @@ LEVELS = [
         "#  #   L   D   #   #",
         "#  #   L   D   #   #",
         "#  #####   #####   #",
-        "#      D   L       #",
+        "#      D   L  G    #",
         "#  LLLLL   DDDDD   #",
-        "#                  #",
+        "#    S             #",
         "#  DDDDD   LLLLL   #",
-        "#      L   D       #",
+        "#      L   D  G    #",
         "#  #####   #####   #",
         "#  #   D   L   #   #",
         "#  #   D   L   #   #",
@@ -54,6 +57,7 @@ class Level:
         self.universal_walls = []
         self.light_walls = []
         self.dark_walls = []
+        self.guards = []
         self.player_start = (TILE_SIZE, TILE_SIZE)
         self.key_rect = None
         self.key_dimension = None
@@ -83,6 +87,10 @@ class Level:
                 elif cell == "2":
                     self.key_rect = pygame.Rect(x + 10, y + 10, TILE_SIZE - 20, TILE_SIZE - 20)
                     self.key_dimension = "DARK"
+                elif cell == "G":
+                    self.guards.append(Guard(x, y, "LIGHT", direction=(1, 0)))
+                elif cell == "S":
+                    self.guards.append(Guard(x, y, "DARK", direction=(-1, 0)))
                 elif cell == "E":
                     self.exit_rect = rect
 
@@ -91,33 +99,40 @@ class Level:
             return self.universal_walls + self.light_walls
         return self.universal_walls + self.dark_walls
 
+    def update_guards(self, dt):
+        for guard in self.guards:
+            guard.update(dt, self.get_active_walls(guard.dimension))
+
     def draw(self, surface, dimension):
         palette = PALETTES[dimension]
         surface.fill(palette["bg"])
 
-        # 1. Crtanje silueta (ghost zidova) iz suprotne dimenzije
+        # 1. Siluete zidova iz suprotne dimenzije
         ghost_walls = self.dark_walls if dimension == "LIGHT" else self.light_walls
         for wall in ghost_walls:
             pygame.draw.rect(surface, palette["ghost_wall"], wall, width=2, border_radius=4)
 
-        # 2. Crtanje aktivnih dimenzionih zidova
+        # 2. Aktivni dimenzioni zidovi
         active_dim_walls = self.light_walls if dimension == "LIGHT" else self.dark_walls
         for wall in active_dim_walls:
             pygame.draw.rect(surface, palette["active_wall"], wall, border_radius=4)
 
-        # 3. Crtanje univerzalnih zidova
+        # 3. Univerzalni zidovi
         for wall in self.universal_walls:
             pygame.draw.rect(surface, palette["universal_wall"], wall)
 
-        # 4. Crtanje ključa (Data Core) ako nije pokupljen
+        # 4. Ključ (Data Core)
         if not self.key_collected and self.key_rect:
             if self.key_dimension == dimension:
                 pygame.draw.rect(surface, palette["key"], self.key_rect, border_radius=6)
             else:
-                # Obrisi ključa ako je u drugoj dimenziji
                 pygame.draw.rect(surface, palette["ghost_wall"], self.key_rect, width=2, border_radius=6)
 
-        # 5. Crtanje izlaza (Exit)
+        # 5. Izlaz (Exit)
         if self.exit_rect:
             exit_color = palette["exit_open"] if self.key_collected else palette["exit_locked"]
             pygame.draw.rect(surface, exit_color, self.exit_rect, border_radius=6)
+
+        # 6. Čuvari i njihova vidna polja
+        for guard in self.guards:
+            guard.draw(surface, dimension)

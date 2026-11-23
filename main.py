@@ -83,6 +83,13 @@ class Game:
                     self.player.top = wall.bottom
 
     def check_interactions(self):
+        #Provera da li nas je video ili dodirnuo cuvar iz aktivne dimenzije.
+        for guard in self.level.guards:
+            if guard.dimension == self.dimension:
+                if self.player.colliderect(guard.rect) or self.player.colliderect(guard.vision_rect):
+                    self.load_level(self.level_index)
+                    return
+
         # Skupljanje ključa (samo ako smo u istoj dimenziji kao ključ)
         if (
             not self.level.key_collected
@@ -140,12 +147,16 @@ class Game:
             if self.flash_alpha > 0:
                 self.flash_alpha = max(0, self.flash_alpha - 600 * dt)
 
+            self.level.update_guards(dt)
+            self.move_player(dt)
+            self.check_interactions()
             self.move_player(dt)
             self.check_interactions()
 
             self.level.draw(self.screen, self.dimension)
             self.draw_ui_and_effects()
             pygame.display.flip()
+
 
 
 if __name__ == "__main__":

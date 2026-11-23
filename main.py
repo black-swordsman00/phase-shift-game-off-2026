@@ -5,7 +5,7 @@ from settings import WIDTH, HEIGHT, FPS, PLAYER_SPEED, SHIFT_COOLDOWN, PALETTES,
 from levels import LEVELS, Level
 from sound import SoundManager
 from effects import EffectManager
-
+import asyncio
 
 class Game:
     def __init__(self):
@@ -219,7 +219,7 @@ class Game:
         text_surf = self.font.render(status_text, True, text_color)
         self.screen.blit(text_surf, (15, 10))
 
-    def run(self):
+    async def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0
 
@@ -269,7 +269,8 @@ class Game:
                 self.draw_victory_screen()
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
 
 if __name__ == "__main__":
-    Game().run()
+    asyncio.run(Game().run())

@@ -10,11 +10,14 @@ from enemies import Guard
 # 'P' - Početna pozicija igrača
 # '1' - Ključ (Data Core) u LIGHT dimenziji
 # '2' - Ključ (Data Core) u DARK dimenziji
-# 'G' - Čuvar u LIGHT dimenziji (patrolira horizontalno)
-# 'S' - Čuvar u DARK dimenziji (patrolira horizontalno)
+# 'G' - Čuvar u LIGHT dimenziji (horizontalno)
+# 'S' - Čuvar u DARK dimenziji (horizontalno)
+# 'V' - Čuvar u LIGHT dimenziji (vertikalno)
+# 'W' - Čuvar u DARK dimenziji (vertikalno)
 # 'E' - Izlaz (Exit)
 
 LEVELS = [
+    # Nivo 1: Upoznavanje sa dimenzijama i čuvarima
     [
         "####################",
         "#P   L        D   2#",
@@ -32,6 +35,7 @@ LEVELS = [
         "#        ##        #",
         "####################",
     ],
+    # Nivo 2: Ukrštanje patrola
     [
         "####################",
         "#P #   L   D   #  E#",
@@ -47,6 +51,60 @@ LEVELS = [
         "#  #   D   L   #   #",
         "#  #   D   L   #   #",
         "# 1#   D   L   #   #",
+        "####################",
+    ],
+    # Nivo 3: Vertikalni koridori
+    [
+        "####################",
+        "#P  L   D   L   D 2#",
+        "#   L V D W L V D  #",
+        "#   L   D   L   D  #",
+        "#   L   D   L   D  #",
+        "#   #   #   #   #  #",
+        "#                  #",
+        "#  ###  #####  ### #",
+        "#                  #",
+        "#   #   #   #   #  #",
+        "#   D   L   D   L  #",
+        "#   D W L V D W L  #",
+        "#   D   L   D   L  #",
+        "#   D   L   D   L E#",
+        "####################",
+    ],
+    # Nivo 4: Centralni trezor
+    [
+        "####################",
+        "#P       ##       E#",
+        "#  LLLL  ##  DDDD  #",
+        "#  L  L      D  D  #",
+        "#  L  L  G   D  D  #",
+        "#  LLLL      DDDD  #",
+        "#        ##        #",
+        "#   V   #1     W   #",
+        "#        ##        #",
+        "#  DDDD      LLLL  #",
+        "#  D  D  S   L  L  #",
+        "#  D  D      L  L  #",
+        "#  DDDD  ##  LLLL  #",
+        "#        ##        #",
+        "####################",
+    ],
+    # Nivo 5: Finalni test refleksa
+    [
+        "####################",
+        "#P  L    G    D   E#",
+        "#   L  #####  D    #",
+        "#      D   L       #",
+        "#  #####   #####   #",
+        "#  V     S     W   #",
+        "#  #  LLLLLLL  #   #",
+        "#  #  L  2  L  #   #",
+        "#  #  LLL DLL  #   #",
+        "#  V     G     W   #",
+        "#  #####   #####   #",
+        "#      L   D       #",
+        "#   D  #####  L    #",
+        "#   D    S    L    #",
         "####################",
     ],
 ]
@@ -91,6 +149,10 @@ class Level:
                     self.guards.append(Guard(x, y, "LIGHT", direction=(1, 0)))
                 elif cell == "S":
                     self.guards.append(Guard(x, y, "DARK", direction=(-1, 0)))
+                elif cell == "V":
+                    self.guards.append(Guard(x, y, "LIGHT", direction=(0, 1)))
+                elif cell == "W":
+                    self.guards.append(Guard(x, y, "DARK", direction=(0, -1)))
                 elif cell == "E":
                     self.exit_rect = rect
 
